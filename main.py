@@ -1,5 +1,6 @@
 import time
 import os
+import random
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -87,27 +88,34 @@ class Board:
                 active_round += 1
         
         result = board.is_game_finished()
-        print(result)
         if result == "X":
             print(f"{player1.name} has won.")
+            time.sleep(2)
         elif result == "O":
             print(f"{player2.name} has won.")
+            time.sleep(2)
         else:
             print("Draw.")
+            time.sleep(2)
         
 
 
 class Player:
-    def __init__(self, name, sign, active):
+    def __init__(self, name, sign, active, ai):
         
         self.name = name
         self.sign = sign
         self.active = active
+        self.ai = ai
+    
     
     def make_move(self, board, next_player):
         inp = ""
         while inp.lower not in ["a1","a2","a3","b1","b2","b3","c1","c2","c3"]:
-            inp = input(f"\n{self.name}, make your move: ").lower()
+            if not self.ai:
+                inp = input(f"\n{self.name}, make your move: \n").lower()    
+            else:
+                inp = self.ai_random_move_generator()
             if inp.lower() not in ["a1","a2","a3","b1","b2","b3","c1","c2","c3"]:
                 print("Wrong input. Choose an existing cell.")
                 time.sleep(2)
@@ -119,79 +127,95 @@ class Player:
                 self.active = False
                 next_player.active = True
                 break            
-            if inp == "a2" and board.cells[1][0] == " ":
+            elif inp == "a2" and board.cells[1][0] == " ":
                 board.cells[1][0] = self.sign
                 self.active = False
                 next_player.active = True
                 break
-            if inp == "a3" and board.cells[2][0] == " ":
+            elif inp == "a3" and board.cells[2][0] == " ":
                 board.cells[2][0] = self.sign
                 self.active = False
                 next_player.active = True
                 break
             
             # change board column b
-            if inp == "b1" and board.cells[0][1] == " ":
+            elif inp == "b1" and board.cells[0][1] == " ":
                 board.cells[0][1] = self.sign
                 self.active = False
                 next_player.active = True
                 break
-            if inp == "b2" and board.cells[1][1] == " ":
+            elif inp == "b2" and board.cells[1][1] == " ":
                 board.cells[1][1] = self.sign
                 self.active = False
                 next_player.active = True
                 break
-            if inp == "b3" and board.cells[2][1] == " ":
+            elif inp == "b3" and board.cells[2][1] == " ":
                 board.cells[2][1] = self.sign
                 self.active = False
                 next_player.active = True
                 break
 
             # change board column c
-            if inp == "c1" and board.cells[0][2] == " ":
+            elif inp == "c1" and board.cells[0][2] == " ":
                 board.cells[0][2] = self.sign
                 self.active = False
                 next_player.active = True
                 break
-            if inp == "c2" and board.cells[1][2] == " ":
+            elif inp == "c2" and board.cells[1][2] == " ":
                 board.cells[1][2] = self.sign
                 self.active = False
                 next_player.active = True
                 break
-            if inp == "c3" and board.cells[2][2] == " ":
+            elif inp == "c3" and board.cells[2][2] == " ":
                 board.cells[2][2] = self.sign
                 self.active = False
                 next_player.active = True
                 break
             
-            else:
+            elif not self.ai:
                 print("Cell already taken. Choose another one.")
                 inp = ""
 
+    def ai_random_move_generator(self):
+        list_of_column = ["a", "b", "c"]
+        list_of_row = ["1", "2", "3"]
 
+        return random.choice(list_of_column) + random.choice(list_of_row)
+    
 
 # start program
 while True:
     clear_screen()
-    print("  Tic Tac Toe\n"
-        "--------------\n"
-        "[1] Start Game\n"
-        "[2] Exit Game\n")
+    print("      Tic Tac Toe\n"
+        "-----------------------\n"
+        "[1] Start with 2 player\n"
+        "[2] Start with (bad) AI\n"
+        "[3] Exit Game\n")
 
-    inp = input("Type 1 or 2: ")
+    inp = input("Type 1, 2 or 3: ")
 
     if inp == "1":
         clear_screen()
         board_cells = []
-        player1 = Player(input("Type the name of player 1: "), "X", True)
-        player2 = Player(input("Type the name of Player 2: "), "O", False)
+        player1 = Player(input("Type the name of player 1: "), "X", True, False)
+        player2 = Player(input("Type the name of Player 2: "), "O", False, False)
         board = Board(board_cells)
 
         board.game_start(player1, player2)
 
-    if inp == "2":
+    elif inp == "2":
+        clear_screen()
+        board_cells = []
+        player1 = Player(input("Type the name of player 1: "), "X", True, False)
+        ai = Player("AI", "O", True, True)
+        board = Board(board_cells)
+
+        board.game_start(player1, ai)
+
+    elif inp == "3":
         print("Goodbye.")
         break
+
     else:
-        print("Wrong input. Type 1 or 2.")
+        print("Wrong input. Type 1, 2 or 3.")
         time.sleep(2)
