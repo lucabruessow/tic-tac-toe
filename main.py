@@ -103,9 +103,6 @@ class Player:
         self.name = name
         self.sign = sign
         self.active = active
-
-    def __str__(self):
-        return f"{self.name}"
     
     def make_move(self, board, next_player):
         inp = ""
@@ -174,14 +171,27 @@ class Player:
 
 
 # start program
-clear_screen()
+while True:
+    clear_screen()
+    print("  Tic Tac Toe\n"
+        "--------------\n"
+        "[1] Start Game\n"
+        "[2] Exit Game\n")
 
-board_cells = []
+    inp = input("Type 1 or 2: ")
 
-player1 = Player(input("Type the name of player 1: "), "X", True)
-player2 = Player(input("Type the name of Player 2: "), "O", False)
+    if inp == "1":
+        clear_screen()
+        board_cells = []
+        player1 = Player(input("Type the name of player 1: "), "X", True)
+        player2 = Player(input("Type the name of Player 2: "), "O", False)
+        board = Board(board_cells)
 
-board = Board(board_cells)
+        board.game_start(player1, player2)
 
-board.game_start(player1, player2)
-result = board.is_game_finished()
+    if inp == "2":
+        print("Goodbye.")
+        break
+    else:
+        print("Wrong input. Type 1 or 2.")
+        time.sleep(2)
