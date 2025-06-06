@@ -72,16 +72,29 @@ class Board:
             return False """
 
     def game_start(self, player1, player2):
-        while not self.is_game_finished():
+        active_round = 0
+        while not self.is_game_finished() and active_round < 9:
             clear_screen()
             print(board)
             print(player1.active)
             
             if player1.active:
                 player1.make_move(self, player2)
+                active_round += 1
 
             elif player2.active:
                 player2.make_move(self, player1)
+                active_round += 1
+        
+        result = board.is_game_finished()
+        print(result)
+        if result == "X":
+            print(f"{player1.name} has won.")
+        elif result == "O":
+            print(f"{player2.name} has won.")
+        else:
+            print("Draw.")
+        
 
 
 class Player:
@@ -172,10 +185,3 @@ board = Board(board_cells)
 
 board.game_start(player1, player2)
 result = board.is_game_finished()
-
-if result == "X":
-    print(f"{player1.name} has won.")
-if result == "O":
-    print(f"{player2.name} has won.")
-if result == "draw":
-    print("Draw.")
