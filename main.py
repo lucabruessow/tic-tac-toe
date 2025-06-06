@@ -97,8 +97,6 @@ class Board:
         else:
             print("Draw.")
             time.sleep(2)
-        
-
 
 class Player:
     def __init__(self, name, sign, active, ai):
@@ -107,7 +105,6 @@ class Player:
         self.sign = sign
         self.active = active
         self.ai = ai
-    
     
     def make_move(self, board, next_player):
         inp = ""
@@ -182,6 +179,9 @@ class Player:
 
         return random.choice(list_of_column) + random.choice(list_of_row)
     
+    def ai_best_move_generator(self):
+        pass
+
 
 # start program
 while True:
