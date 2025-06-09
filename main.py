@@ -1,6 +1,7 @@
 import time
 import os
 import random
+import copy
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -18,11 +19,18 @@ class Board:
                 f"2  {self.cells[1][0]}   {self.cells[1][1]}   {self.cells[1][2]}\n"
                 f"3  {self.cells[2][0]}   {self.cells[2][1]}   {self.cells[2][2]}")
     
+    def is_draw(self):
+        for row in self.cells:
+            for cell in row:
+                if cell == " ":
+                    return False
+        return True
+
     def is_game_finished(self):
         win_conditions = [
             # horizontal
             [(0, 0), (0, 1), (0, 2)],
-            [(1, 0), (1, 1), (2, 2)],
+            [(1, 0), (1, 1), (1, 2)],
             [(2, 0), (2, 1), (2, 2)],
 
             #vertical
@@ -43,6 +51,9 @@ class Board:
             if self.cells[a[0]][a[1]] == self.cells[b[0]][b[1]] == self.cells[c[0]][c[1]] and self.cells[a[0]][a[1]] != " ":
                 return self.cells[a[0]][a[1]]
 
+        if self.is_draw():
+            return "draw"
+            
         """ # all horizontal options
         if self.cells[0][0] == self.cells[0][1] == self.cells[0][2] and self.cells[0][0] != " ":
             return True
@@ -73,20 +84,21 @@ class Board:
             return False """
 
     def game_start(self, player1, player2):
-        active_round = 0
-        while not self.is_game_finished() and active_round < 9:
+        while not self.is_game_finished():
             clear_screen()
             print(board)
-            print(player1.active)
             
             if player1.active:
                 player1.make_move(self, player2)
-                active_round += 1
 
             elif player2.active:
                 player2.make_move(self, player1)
-                active_round += 1
         
+        # print with all moves on board
+        clear_screen()
+        print(board)
+
+        # print winner
         result = board.is_game_finished()
         if result == "X":
             print(f"{player1.name} has won.")
@@ -94,9 +106,18 @@ class Board:
         elif result == "O":
             print(f"{player2.name} has won.")
             time.sleep(2)
-        else:
+        elif result == "draw":
             print("Draw.")
             time.sleep(2)
+    
+    def get_available_moves(self):
+        moves = []
+        for i in range(3):
+            for j in range(3):
+                if self.cells[i][j] == " ":
+                    moves.append((i, j))
+        return moves
+    
 
 class Player:
     def __init__(self, name, sign, active, ai):
@@ -112,7 +133,7 @@ class Player:
             if not self.ai:
                 inp = input(f"\n{self.name}, make your move: \n").lower()    
             else:
-                inp = self.ai_random_move_generator()
+                inp = self.ai_best_move_generator(board)
             if inp.lower() not in ["a1","a2","a3","b1","b2","b3","c1","c2","c3"]:
                 print("Wrong input. Choose an existing cell.")
                 time.sleep(2)
@@ -179,17 +200,54 @@ class Player:
 
         return random.choice(list_of_column) + random.choice(list_of_row)
     
-    def ai_best_move_generator(self):
-        pass
+    def simulate(self, board, current_sign):
+        winner = board.is_game_finished()
+        if winner:
+            if winner == self.sign: return 1
+            if winner == "draw": return 0
+            return -1
+        
+        total = 0
+        for (i, j) in board.get_available_moves():
+            copy_board = copy.deepcopy(board)
+            copy_board.cells[i][j] = current_sign
+            next_sign = "O" if current_sign == "X" else "X"
+            total += self.simulate(copy_board, next_sign)
+        return total
+
+    def ai_best_move_generator(self, board):
+        best_move = None
+        best_score = -999
+
+        for move in board.get_available_moves():
+            i = move[0]
+            j = move[1]
+
+            test_board = copy.deepcopy(board)
+            test_board.cells[i][j] = self.sign
+
+            score = self.simulate(test_board, "X")
+
+            if score > best_score:
+                best_score = score
+                best_move = (i, j)
+        
+        convert_to_string = {
+            (0, 0): "a1", (1, 0): "a2", (2, 0): "a3",
+            (0, 1): "b1", (1, 1): "b2", (2, 1): "b3",
+            (0, 2): "c1", (1, 2): "c2", (2, 2): "c3"
+        }
+
+        return convert_to_string[best_move]
 
 
 # start program
 while True:
     clear_screen()
     print("      Tic Tac Toe\n"
-        "-----------------------\n"
+        "------------------------\n"
         "[1] Start with 2 player\n"
-        "[2] Start with (bad) AI\n"
+        "[2] Start with (good) AI\n"
         "[3] Exit Game\n")
 
     inp = input("Type 1, 2 or 3: ")
